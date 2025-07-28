@@ -1,8 +1,22 @@
+const starContainer = document.getElementById("stars-wrapper");
+
+for (let i = 0; i < 100; i++) {
+	const star = document.createElement("div");
+	star.classList.add("star");
+
+	// Random position and animation speed
+	star.style.left = `${Math.random() * 100}vw`;
+	star.style.top = `${Math.random() * -1}vh`;
+	star.style.animationDuration = `${2 + Math.random() * 4}s`;
+	star.style.opacity = Math.random();
+
+	starContainer.appendChild(star);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 	createGrid();
 });
 
-// Function to create the Sudoku grid
 function createGrid() {
 	const grid = document.getElementById("sudoku-grid");
 	for (let row = 0; row < 9; row++) {
@@ -20,7 +34,6 @@ function createGrid() {
 	}
 }
 
-// Function to solve the Sudoku puzzle
 function solveSudoku() {
 	const grid = getGrid();
 	if (solve(grid)) {
@@ -30,7 +43,11 @@ function solveSudoku() {
 	}
 }
 
-// Function to get the current state of the grid
+function clearGrid() {
+	const inputs = document.querySelectorAll("#sudoku-grid input");
+	inputs.forEach((cell) => (cell.value = ""));
+}
+
 function getGrid() {
 	const grid = [];
 	const rows = document.querySelectorAll("#sudoku-grid tr");
@@ -45,7 +62,6 @@ function getGrid() {
 	return grid;
 }
 
-// Function to set the grid with the solved puzzle
 function setGrid(grid) {
 	const rows = document.querySelectorAll("#sudoku-grid tr");
 	rows.forEach((row, rowIndex) => {
@@ -56,61 +72,40 @@ function setGrid(grid) {
 	});
 }
 
-// Recursive function to solve the Sudoku puzzle using backtracking
 function solve(grid) {
 	const emptyCell = findEmptyCell(grid);
-	if (!emptyCell) {
-		return true; // Puzzle solved
-	}
+	if (!emptyCell) return true;
+
 	const [row, col] = emptyCell;
 	for (let num = 1; num <= 9; num++) {
 		if (isValid(grid, row, col, num)) {
 			grid[row][col] = num;
-			if (solve(grid)) {
-				return true;
-			}
-			grid[row][col] = 0; // Backtrack
+			if (solve(grid)) return true;
+			grid[row][col] = 0;
 		}
 	}
-	return false; // Trigger backtracking
+	return false;
 }
 
-// Function to find an empty cell in the grid
 function findEmptyCell(grid) {
 	for (let row = 0; row < 9; row++) {
 		for (let col = 0; col < 9; col++) {
-			if (grid[row][col] === 0) {
-				return [row, col];
-			}
+			if (grid[row][col] === 0) return [row, col];
 		}
 	}
-	return null; // No empty cells found
+	return null;
 }
 
-// Function to check if placing a number in a cell is valid
 function isValid(grid, row, col, num) {
-	// Check the row
 	for (let i = 0; i < 9; i++) {
-		if (grid[row][i] === num) {
-			return false;
-		}
+		if (grid[row][i] === num || grid[i][col] === num) return false;
 	}
 
-	// Check the column
-	for (let i = 0; i < 9; i++) {
-		if (grid[i][col] === num) {
-			return false;
-		}
-	}
-
-	// Check the 3x3 subgrid
 	const startRow = Math.floor(row / 3) * 3;
 	const startCol = Math.floor(col / 3) * 3;
 	for (let i = 0; i < 3; i++) {
 		for (let j = 0; j < 3; j++) {
-			if (grid[startRow + i][startCol + j] === num) {
-				return false;
-			}
+			if (grid[startRow + i][startCol + j] === num) return false;
 		}
 	}
 
